@@ -34,6 +34,10 @@ const Dashboard = () => {
             <li>
               <Link to="/notification-management">Notification Management</Link>
             </li>
+
+            <li>
+              <Link to="/donor">Donors</Link>
+            </li>
           </ul>
         </nav>
       </aside>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/donot.css';
 
-const DonorManagement = () => {
+const Donors = () => {
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -46,7 +46,6 @@ const DonorManagement = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
     try {
       if (selectedDonorId) {
         // Update existing donor
@@ -116,7 +115,6 @@ const DonorManagement = () => {
   return (
     <div className="donor-management">
       <h1>{selectedDonorId ? 'Update Donor' : 'Add New Donor'}</h1>
-
       {/* Form */}
       <form onSubmit={handleSubmit} className="donor-form">
         <div className="form-group">
@@ -217,11 +215,9 @@ const DonorManagement = () => {
           </button>
         )}
       </form>
-
       {/* Success/Error Messages */}
       {success && <p className="success-msg">{success}</p>}
       {error && <p className="error-msg">{error}</p>}
-
       {/* Donor List */}
       <h2>Donor List</h2>
       <div className="donor-list">
@@ -279,4 +275,4 @@ const DonorManagement = () => {
   );
 };
 
-export default DonorManagement;
+export default Donors;

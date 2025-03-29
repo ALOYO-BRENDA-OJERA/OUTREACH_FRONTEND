@@ -8,6 +8,7 @@ import HospitalManagement from './forms/hospital_management';
 import DonorManagement from './forms/donor_records';
 import DonorMatchManagement from './forms/donor_match';
 import NotificationManagement from './forms/notification';
+import Donors from './forms/donor';
 // import BloodRequests from './forms/request'
 import Home from './pages/home';
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="/donor_records" element={<DonorManagement />} />
             <Route path="/donor-match-management" element={<DonorMatchManagement />} />
             <Route path="/notification-management" element={<NotificationManagement />} />
+            <Route path="/donor" element={<Donors />} />
             
           </Routes>
         </div>
