@@ -1,158 +1,212 @@
 .notification-management {
-    padding: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .notification-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-  }
-  
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-  }
-  
-  .submit-btn,
-  .cancel-btn,
-  .notify-match-btn,
-  .notify-no-matches-btn,
-  .batch-notify-btn,
-  .check-unmatched-btn {
-    padding: 10px 20px;
-    font-size: 1.1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  
-  .submit-btn {
-    background-color: #e74c3c;
-    color: white;
-  }
-  
-  .submit-btn:hover {
-    background-color: #c0392b;
-  }
-  
-  .cancel-btn {
-    background-color: #ccc;
-    color: #333;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #bbb;
-  }
-  
-  .notify-match-btn {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .notify-match-btn:hover {
-    background-color: #2980b9;
-  }
-  
-  .notify-no-matches-btn {
-    background-color: #e67e22;
-    color: white;
-  }
-  
-  .notify-no-matches-btn:hover {
-    background-color: #d35400;
-  }
-  
-  .batch-notify-btn {
-    background-color: #27ae60;
-    color: white;
-  }
-  
-  .batch-notify-btn:hover {
-    background-color: #219653;
-  }
-  
-  .check-unmatched-btn {
-    background-color: #8e44ad;
-    color: white;
-  }
-  
-  .check-unmatched-btn:hover {
-    background-color: #732d91;
-  }
-  
-  .success-msg {
-    color: #27ae60;
-    margin: 10px 0;
-  }
-  
-  .error-msg {
-    color: #e74c3c;
-    margin: 10px 0;
-  }
-  
-  .notification-list table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  
-  .notification-list th,
-  .notification-list td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .notification-list th {
-    background-color: #e74c3c;
-    color: white;
-  }
-  
-  .edit-btn,
-  .delete-btn {
-    padding: 5px 10px;
-    margin-right: 5px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  
-  .edit-btn {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .edit-btn:hover {
-    background-color: #2980b9;
-  }
-  
-  .delete-btn {
-    background-color: #e74c3c;
-    color: white;
-  }
-  
-  .delete-btn:hover {
-    background-color: #c0392b;
-  }
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.notification-form {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.cancel-btn {
+  background: #f44336;
+  color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #d32f2f;
+}
+
+.special-actions {
+  margin-bottom: 30px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.notify-match-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.notify-no-matches-btn {
+  background: #FF9800;
+  color: white;
+}
+
+.batch-notify-btn {
+  background: #9C27B0;
+  color: white;
+}
+
+.check-unmatched-btn {
+  background: #607D8B;
+  color: white;
+}
+
+.notification-list {
+  margin-top: 30px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+.message-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+}
+
+.status-badge.pending {
+  background-color: #FFF3CD;
+  color: #856404;
+}
+
+.status-badge.sent {
+  background-color: #D4EDDA;
+  color: #155724;
+}
+
+.status-badge.failed {
+  background-color: #F8D7DA;
+  color: #721C24;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.close-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
+  background: #f9f9f9;
+  border-radius: 4px;
+}

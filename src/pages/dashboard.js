@@ -13,30 +13,26 @@ const Dashboard = () => {
             <li>
               <Link to="/dashboard">Dashboard</Link>
             </li>
-            {/* <li>
-              <Link to="/profile">Profile</Link>
-            </li> */}
-            <li>
-              <Link to="/request">Blood Requests</Link>
-            </li>
-            <li>
-              <Link to="/notifications">Notifications</Link>
-            </li>
             <li>
               <Link to="/hospital-management">Hospital Management</Link>
             </li>
             <li>
-              <Link to="/donor_records">Donor Management</Link>
+              <Link to="/donor">Donors</Link>
+            </li>
+            <li>
+              <Link to="/request">Blood Requests</Link>
             </li>
             <li>
               <Link to="/donor-match-management">Donor Match Management</Link>
             </li>
             <li>
-              <Link to="/notification-management">Notification Management</Link>
+              <Link to="/notifications">Notifications</Link>
             </li>
-
             <li>
-              <Link to="/donor">Donors</Link>
+              <Link to="/donor_records">Donor Records</Link>
+            </li>
+            <li>
+              <Link to="/notification-management">Notification Management</Link>
             </li>
           </ul>
         </nav>

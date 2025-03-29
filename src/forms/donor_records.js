@@ -28,18 +28,21 @@ const DonorManagement = () => {
       setLoading(true);
       try {
         const [recordsRes, donorsRes, hospitalsRes] = await Promise.all([
-          axios.get('/api/v1/donor_records/records'),
-          axios.get('/api/v1/donors'),
-          axios.get('/api/v1/hospitals')
+          axios.get('http://127.0.0.1:5000/api/v1/donor_records/get_all_records'),
+          axios.get('http://127.0.0.1:5000/api/v1/donors/get_all_donors'),
+          axios.get('http://127.0.0.1:5000/api/v1/hospitals/get_hospitals')
         ]);
         
-        setDonationRecords(recordsRes.data);
-        setDonors(donorsRes.data);
-        setHospitals(hospitalsRes.data);
+        setDonationRecords(Array.isArray(recordsRes?.data) ? recordsRes.data : []);
+        setDonors(Array.isArray(donorsRes?.data) ? donorsRes.data : []);
+        setHospitals(Array.isArray(hospitalsRes?.data) ? hospitalsRes.data : []);
         setError('');
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load data. Please try again later.');
+        setDonationRecords([]);
+        setDonors([]);
+        setHospitals([]);
       } finally {
         setLoading(false);
       }
@@ -52,20 +55,21 @@ const DonorManagement = () => {
   const fetchFilteredRecords = async () => {
     setLoading(true);
     try {
-      let url = '/api/v1/donor_records/records';
+      let url = 'http://127.0.0.1:5000/api/v1/donor_records/records';
       
       if (selectedDonorId) {
-        url = `/api/v1/donor_records/records/donor/${selectedDonorId}`;
+        url = `http://127.0.0.1:5000/api/v1/donor_records/records/donor/${selectedDonorId}`;
       } else if (selectedHospitalId) {
-        url = `/api/v1/donor_records/records/hospital/${selectedHospitalId}`;
+        url = `http://127.0.0.1:5000/api/v1/donor_records/records/hospital/${selectedHospitalId}`;
       }
       
       const response = await axios.get(url);
-      setDonationRecords(response.data);
+      setDonationRecords(Array.isArray(response?.data) ? response.data : []);
       setError('');
     } catch (err) {
       console.error('Error fetching filtered records:', err);
       setError('Failed to load filtered records. Please try again later.');
+      setDonationRecords([]);
     } finally {
       setLoading(false);
     }
@@ -82,12 +86,13 @@ const DonorManagement = () => {
     setSelectedHospitalId('');
     
     try {
-      const response = await axios.get('/api/v1/donor_records/records');
-      setDonationRecords(response.data);
+      const response = await axios.get('http://127.0.0.1:5000/api/v1/donor_records/records');
+      setDonationRecords(Array.isArray(response?.data) ? response.data : []);
       setError('');
     } catch (err) {
       console.error('Error resetting filters:', err);
       setError('Failed to reset filters. Please try again later.');
+      setDonationRecords([]);
     }
   };
 
@@ -98,7 +103,6 @@ const DonorManagement = () => {
       [name]: value
     });
 
-    // If donor is selected, auto-fill blood type
     if (name === 'donor_id' && value) {
       const selectedDonor = donors.find(donor => donor.id === parseInt(value));
       if (selectedDonor) {
@@ -131,22 +135,36 @@ const DonorManagement = () => {
     setMedicalNote('');
     
     try {
+      // Convert string IDs to integers before sending to backend
+      const payload = {
+        ...formData,
+        donor_id: parseInt(formData.donor_id, 10),
+        hospital_id: parseInt(formData.hospital_id, 10)
+      };
+
+      // Validate IDs are numbers
+      if (isNaN(payload.donor_id) || isNaN(payload.hospital_id)) {
+        throw new Error('Invalid donor or hospital ID');
+      }
+
       let response;
       
       if (isEditing) {
-        // Update existing record
-        response = await axios.put(`/api/v1/donor_records/records/${currentRecordId}`, formData);
+        response = await axios.put(
+          `http://127.0.0.1:5000/api/v1/donor_records/records/${currentRecordId}`,
+          payload
+        );
       } else {
-        // Create new record
-        response = await axios.post('/api/v1/donor_records/create_record', formData);
+        response = await axios.post(
+          'http://127.0.0.1:5000/api/v1/donor_records/create_record',
+          payload
+        );
       }
       
-      // Check for medical notes
       if (response.data.medical_note) {
         setMedicalNote(response.data.medical_note);
       }
       
-      // Check for medical restriction
       if (response.data.status === 'medical_restriction') {
         setMedicalNote(response.data.message + '. Next eligible date: ' + 
           new Date(response.data.next_eligible_date).toLocaleDateString() + 
@@ -156,20 +174,17 @@ const DonorManagement = () => {
       
       setSuccess(isEditing ? 'Donation record updated successfully!' : 'Donation record created successfully!');
       
-      // Refresh the records list
-      const recordsResponse = await axios.get('/api/v1/donor_records/records');
-      setDonationRecords(recordsResponse.data);
+      const recordsResponse = await axios.get('http://127.0.0.1:5000/api/v1/donor_records/records');
+      setDonationRecords(Array.isArray(recordsResponse?.data) ? recordsResponse.data : []);
       
-      // Reset the form
       resetForm();
     } catch (err) {
       console.error('Error submitting form:', err);
-      setError(err.response?.data?.error || 'An error occurred while processing your request.');
+      setError(err.response?.data?.error || err.message || 'An error occurred while processing your request.');
     }
   };
 
   const handleEdit = (record) => {
-    // Format the date for the input field
     const nextEligibleDate = new Date(record.next_eligible_donation);
     const formattedDate = nextEligibleDate.toISOString().split('T')[0];
     
@@ -190,12 +205,11 @@ const DonorManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this donation record? This action cannot be undone.')) {
       try {
-        await axios.delete(`/api/v1/donor_records/records/${id}`);
+        await axios.delete(`http://127.0.0.1:5000/api/v1/donor_records/records/${id}`);
         setSuccess('Donation record deleted successfully!');
         
-        // Refresh the records list
-        const response = await axios.get('/api/v1/donor_records/records');
-        setDonationRecords(response.data);
+        const response = await axios.get('http://127.0.0.1:5000/api/v1/donor_records/records');
+        setDonationRecords(Array.isArray(response?.data) ? response.data : []);
       } catch (err) {
         console.error('Error deleting record:', err);
         setError(err.response?.data?.error || 'An error occurred while deleting the record.');
@@ -203,35 +217,41 @@ const DonorManagement = () => {
     }
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
-    const options = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    if (!dateString) return 'N/A';
+    try {
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch {
+      return 'Invalid Date';
+    }
   };
 
-  // Get donor name by ID
   const getDonorName = (donorId) => {
     const donor = donors.find(d => d.id === donorId);
-    return donor ? `${donor.first_name} ${donor.last_name}` : 'Unknown Donor';
+    return donor ? donor.name : 'Unknown Donor';
   };
 
-  // Get hospital name by ID
   const getHospitalName = (hospitalId) => {
     const hospital = hospitals.find(h => h.id === hospitalId);
     return hospital ? hospital.name : 'Unknown Hospital';
   };
 
-  // Check if donor is eligible to donate
   const isDonorEligible = (nextEligibleDate) => {
-    const now = new Date();
-    const eligible = new Date(nextEligibleDate);
-    return now >= eligible;
+    if (!nextEligibleDate) return false;
+    try {
+      const now = new Date();
+      const eligible = new Date(nextEligibleDate);
+      return now >= eligible;
+    } catch {
+      return false;
+    }
   };
 
   return (
@@ -249,13 +269,13 @@ const DonorManagement = () => {
               value={selectedDonorId} 
               onChange={(e) => {
                 setSelectedDonorId(e.target.value);
-                setSelectedHospitalId(''); // Reset hospital filter when donor is selected
+                setSelectedHospitalId('');
               }}
             >
               <option value="">All Donors</option>
-              {donors.map(donor => (
+              {Array.isArray(donors) && donors.map(donor => (
                 <option key={donor.id} value={donor.id}>
-                  {donor.first_name} {donor.last_name}
+                  {donor.name}
                 </option>
               ))}
             </select>
@@ -268,11 +288,11 @@ const DonorManagement = () => {
               value={selectedHospitalId} 
               onChange={(e) => {
                 setSelectedHospitalId(e.target.value);
-                setSelectedDonorId(''); // Reset donor filter when hospital is selected
+                setSelectedDonorId('');
               }}
             >
               <option value="">All Hospitals</option>
-              {hospitals.map(hospital => (
+              {Array.isArray(hospitals) && hospitals.map(hospital => (
                 <option key={hospital.id} value={hospital.id}>
                   {hospital.name}
                 </option>
@@ -305,9 +325,9 @@ const DonorManagement = () => {
               required
             >
               <option value="">Select Donor</option>
-              {donors.map(donor => (
+              {Array.isArray(donors) && donors.map(donor => (
                 <option key={donor.id} value={donor.id}>
-                  {donor.first_name} {donor.last_name} - {donor.blood_type}
+                  {donor.name} - {donor.blood_type}
                 </option>
               ))}
             </select>
@@ -323,7 +343,7 @@ const DonorManagement = () => {
               required
             >
               <option value="">Select Hospital</option>
-              {hospitals.map(hospital => (
+              {Array.isArray(hospitals) && hospitals.map(hospital => (
                 <option key={hospital.id} value={hospital.id}>
                   {hospital.name}
                 </option>
@@ -339,7 +359,7 @@ const DonorManagement = () => {
               name="blood_type"
               value={formData.blood_type}
               onChange={handleInputChange}
-              readOnly // Blood type is auto-filled based on donor
+              readOnly
               required
             />
             <small>Blood type is automatically set based on donor selection</small>
@@ -376,7 +396,7 @@ const DonorManagement = () => {
         
         {loading ? (
           <div className="loading">Loading records...</div>
-        ) : donationRecords.length === 0 ? (
+        ) : !Array.isArray(donationRecords) || donationRecords.length === 0 ? (
           <div className="no-records">No donation records found.</div>
         ) : (
           <table className="records-table">
@@ -428,6 +448,4 @@ const DonorManagement = () => {
   );
 };
 
-// Add this line at the end of your donor_records.js file
 export default DonorManagement;
-

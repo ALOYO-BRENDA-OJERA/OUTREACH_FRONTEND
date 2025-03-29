@@ -29,7 +29,7 @@ const BloodRequests = () => {
 
   const fetchBloodRequests = async () => {
     try {
-      const response = await axios.get('/api/v1/blood_requests/');
+      const response = await axios.get('http://127.0.0.1:5000/api/v1/blood_requests/');
       setRequests(response.data);
     } catch (err) {
       setError('Failed to fetch blood requests');
@@ -39,7 +39,7 @@ const BloodRequests = () => {
 
   const fetchHospitals = async () => {
     try {
-      const response = await axios.get('/api/v1/hospitals/');
+      const response = await axios.get('http://127.0.0.1:5000/api/v1/hospitals/get_hospitals');
       setHospitals(response.data);
     } catch (err) {
       setError('Failed to fetch hospitals');
@@ -79,11 +79,11 @@ const BloodRequests = () => {
     try {
       if (isEditing) {
         // Update existing request
-        await axios.put(`/api/v1/blood_requests/${currentRequestId}`, formData);
+        await axios.put(`http://127.0.0.1:5000/api/v1/blood_requests/${currentRequestId}`, formData);
         setSuccess('Blood request updated successfully');
       } else {
         // Create new request
-        await axios.post('/api/v1/blood_requests/create_blood_request', formData);
+        await axios.post('http://127.0.0.1:5000/api/v1/blood_requests/create_blood_request', formData);
         setSuccess('Blood request created successfully');
       }
       
@@ -115,7 +115,7 @@ const BloodRequests = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this blood request?')) {
       try {
-        await axios.delete(`/api/v1/blood_requests/${id}`);
+        await axios.delete(`http://127.0.0.1:5000/api/v1/blood_requests/${id}`);
         setSuccess('Blood request deleted successfully');
         fetchBloodRequests();
       } catch (err) {

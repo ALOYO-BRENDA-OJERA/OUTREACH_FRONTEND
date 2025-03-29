@@ -10,11 +10,11 @@ const DonorMatchManagement = () => {
   });
   const [matches, setMatches] = useState([]);
   const [selectedMatchId, setSelectedMatchId] = useState(null);
-//   personally
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [potentialDonors, setPotentialDonors] = useState([]);
-
+  const [showAutoMatchResults, setShowAutoMatchResults] = useState(false);
+  const [autoMatchResults, setAutoMatchResults] = useState(null);
+  
   // Fetch all donor matches on component mount
   useEffect(() => {
     fetchMatches();
@@ -40,18 +40,17 @@ const DonorMatchManagement = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
     try {
       if (selectedMatchId) {
         // Update existing match
-        const response = await axios.put(
+        await axios.put(
           `http://localhost:5000/api/v1/donor_matches/${selectedMatchId}`,
           formData
         );
         setSuccess('Donor match updated successfully');
       } else {
         // Create new match
-        const response = await axios.post(
+        await axios.post(
           'http://localhost:5000/api/v1/donor_matches/create_match',
           formData
         );
@@ -87,31 +86,23 @@ const DonorMatchManagement = () => {
     }
   };
 
-  // Find potential matches for a blood request
-  const handleFindMatches = async () => {
+  // Handle auto matching for a specific request
+  const handleAutoMatch = async () => {
     if (!formData.request_id) {
       setError('Please enter a Request ID to find matches');
       return;
     }
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/v1/donor_matches/find-matches/${formData.request_id}`
+      setShowAutoMatchResults(false);
+      const response = await axios.post(
+        `http://localhost:5000/api/v1/donor_matches/auto-match/${formData.request_id}`
       );
-      setPotentialDonors(response.data);
-      setSuccess(`Found ${response.data.length} potential donors`);
+      setAutoMatchResults(response.data);
+      setShowAutoMatchResults(true);
+      setSuccess(`Found ${response.data.matches.length} potential donors`);
+      fetchMatches(); // Refresh the matches list
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to find potential matches');
-    }
-  };
-
-  // Run batch matching
-  const handleBatchMatch = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/api/v1/donor_matches/batch-match');
-      setSuccess(response.data.message);
-      fetchMatches(); // Refresh list after batch match
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to run batch match');
     }
   };
 
@@ -119,13 +110,13 @@ const DonorMatchManagement = () => {
   const resetForm = () => {
     setFormData({ request_id: '', donor_id: '', status: 'Pending' });
     setSelectedMatchId(null);
-    setPotentialDonors([]);
+    setShowAutoMatchResults(false);
   };
 
   return (
     <div className="donor-match-management">
       <h1>{selectedMatchId ? 'Update Donor Match' : 'Create Donor Match'}</h1>
-
+      
       {/* Form */}
       <form onSubmit={handleSubmit} className="match-form">
         <div className="form-group">
@@ -145,7 +136,7 @@ const DonorMatchManagement = () => {
             name="donor_id"
             value={formData.donor_id}
             onChange={handleChange}
-            required
+            required={!showAutoMatchResults}
           />
         </div>
         <div className="form-group">
@@ -163,73 +154,91 @@ const DonorMatchManagement = () => {
             <option value="Completed">Completed</option>
           </select>
         </div>
-        <button type="submit" className="submit-btn">
-          {selectedMatchId ? 'Update Match' : 'Create Match'}
-        </button>
-        {selectedMatchId && (
-          <button type="button" className="cancel-btn" onClick={resetForm}>
-            Cancel
+        <div className="form-actions">
+          <button type="submit" className="submit-btn">
+            {selectedMatchId ? 'Update Match' : 'Create Match'}
           </button>
-        )}
-        <button
-          type="button"
-          className="find-matches-btn"
-          onClick={handleFindMatches}
-        >
-          Find Potential Matches
-        </button>
-        <button
-          type="button"
-          className="batch-match-btn"
-          onClick={handleBatchMatch}
-        >
-          Run Batch Match
-        </button>
+          {selectedMatchId && (
+            <button type="button" className="cancel-btn" onClick={resetForm}>
+              Cancel
+            </button>
+          )}
+          <button
+            type="button"
+            className="auto-match-btn"
+            onClick={handleAutoMatch}
+          >
+            Auto Match Donors
+          </button>
+        </div>
       </form>
-
+      
       {/* Success/Error Messages */}
-      {success && <p className="success-msg">{success}</p>}
-      {error && <p className="error-msg">{error}</p>}
+      {success && <div className="alert success">{success}</div>}
+      {error && <div className="alert error">{error}</div>}
 
-      {/* Potential Donors */}
-      {potentialDonors.length > 0 && (
-        <div className="potential-donors">
-          <h2>Potential Donors</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Blood Type</th>
-                <th>Phone</th>
-                <th>City</th>
-              </tr>
-            </thead>
-            <tbody>
-              {potentialDonors.map((donor) => (
-                <tr key={donor.id}>
-                  <td>{donor.id}</td>
-                  <td>{donor.name}</td>
-                  <td>{donor.blood_type}</td>
-                  <td>{donor.phone}</td>
-                  <td>{donor.city}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Auto Match Results */}
+      {showAutoMatchResults && autoMatchResults && (
+        <div className="auto-match-results">
+          <h2>Auto Match Results</h2>
+          
+          <div className="request-details">
+            <h3>Request Details</h3>
+            <p><strong>Patient:</strong> {autoMatchResults.request_details.name}</p>
+            <p><strong>Blood Type:</strong> {autoMatchResults.request_details.blood_type}</p>
+            <p><strong>Hospital:</strong> {autoMatchResults.request_details.hospital}</p>
+            <p><strong>Urgency:</strong> {autoMatchResults.request_details.urgency}</p>
+            {autoMatchResults.request_details.location && (
+              <p><strong>Location:</strong> {autoMatchResults.request_details.location}</p>
+            )}
+          </div>
+          
+          <div className="matches-list">
+            <h3>Compatible Donors ({autoMatchResults.matches.length})</h3>
+            {autoMatchResults.matches.length > 0 ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Donor Name</th>
+                    <th>Blood Type</th>
+                    <th>Location</th>
+                    <th>Contact</th>
+                    <th>Distance (km)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {autoMatchResults.matches.map((match) => (
+                    <tr key={match.match_id}>
+                      <td>{match.name}</td>
+                      <td>{match.donor_blood_type}</td>
+                      <td>{match.donor_location}</td>
+                      <td>{match.donor_contact}</td>
+                      <td>{match.distance_km ? match.distance_km.toFixed(2) : 'N/A'}</td>
+                      <td>{match.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No compatible donors found for this request.</p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Match List */}
-      <h2>Donor Match List</h2>
-      <div className="match-list">
+      {/* All Matches List */}
+      <h2>All Donor Matches</h2>
+      <div className="matches-table-container">
         {matches.length > 0 ? (
-          <table>
+          <table className="matches-table">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Request ID</th>
                 <th>Donor ID</th>
+                <th>Donor Name</th>
+                <th>Blood Type</th>
                 <th>Status</th>
                 <th>Notified At</th>
                 <th>Actions</th>
@@ -241,9 +250,13 @@ const DonorMatchManagement = () => {
                   <td>{match.id}</td>
                   <td>{match.request_id}</td>
                   <td>{match.donor_id}</td>
-                  <td>{match.status}</td>
+                  <td>{match.donor_details?.name || 'N/A'}</td>
+                  <td>{match.donor_details?.blood_type || 'N/A'}</td>
+                  <td className={`status-${match.status.toLowerCase()}`}>
+                    {match.status}
+                  </td>
                   <td>{new Date(match.notified_at).toLocaleString()}</td>
-                  <td>
+                  <td className="actions">
                     <button
                       className="edit-btn"
                       onClick={() => handleEdit(match)}

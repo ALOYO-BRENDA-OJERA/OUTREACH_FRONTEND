@@ -25,7 +25,7 @@ const Donors = () => {
 
   const fetchDonors = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/v1/donors/');
+      const response = await axios.get('http://127.0.0.1:5000/api/v1/donors/get_all_donors');
       setDonors(response.data);
     } catch (err) {
       setError('Failed to fetch donors');
